@@ -18,8 +18,8 @@ import openai
 from dotenv import load_dotenv
 from postgres_client import execute_sql_query as postgres_execute_query
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables (optional for Railway deployment)
+load_dotenv(override=False)
 
 # Database schema and context for the LLM
 DATABASE_SCHEMA = """
@@ -50,7 +50,7 @@ def get_openai_client():
     """Initialize and return OpenAI client."""
     api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
-        raise ValueError("OPENAI_API_KEY not found in environment variables. Please set it in your .env file.")
+        raise ValueError("OPENAI_API_KEY not found in environment variables. Please set it in your .env file or Railway environment variables.")
     
     return openai.OpenAI(api_key=api_key)
 

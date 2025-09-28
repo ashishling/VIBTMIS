@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 import json
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (optional for Railway deployment)
+load_dotenv(override=False)
 
 class PostgreSQLClient:
     """Client for interacting with PostgreSQL database"""
@@ -21,7 +21,7 @@ class PostgreSQLClient:
         self.connection_string = os.getenv('DATABASE_URL')
         
         if not self.connection_string:
-            raise ValueError("DATABASE_URL must be set in .env file")
+            raise ValueError("DATABASE_URL must be set in .env file or Railway environment variables")
         
         self.connection = None
         self.cursor = None

@@ -11,8 +11,8 @@ from nl_to_sql_postgres import get_openai_client, generate_sql_query, execute_sq
 from local_llm_summarizer import LocalLLMSummarizer, check_ollama_status, get_available_models
 import traceback
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (optional for Railway deployment)
+load_dotenv(override=False)
 
 app = Flask(__name__)
 
