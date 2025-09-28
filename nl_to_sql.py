@@ -18,9 +18,8 @@ from typing import Dict, List, Optional
 import openai
 from dotenv import load_dotenv
 from supabase_client import execute_sql_query as supabase_execute_query
- do 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables (optional for Railway deployment)
+load_dotenv(override=False)
 
 # Database schema and context for the LLM
 DATABASE_SCHEMA = """
@@ -118,8 +117,7 @@ def get_openai_client() -> openai.OpenAI:
     api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
         raise ValueError(
-            "Please set your OpenAI API key as an environment variable:\n"
-            "export OPENAI_API_KEY='your-api-key-here'"
+            "OPENAI_API_KEY not found in environment variables. Please set it in your .env file or Railway environment variables."
         )
     return openai.OpenAI(api_key=api_key)
 
