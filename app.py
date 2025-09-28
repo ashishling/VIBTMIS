@@ -58,13 +58,13 @@ except Exception as e:
     local_llm_available = False
 
 @app.route('/')
-# @requires_auth  # Temporarily disabled for testing
+@requires_auth
 def index():
     """Main page with the query interface."""
     return render_template('index.html', api_connected=api_connected, local_llm_available=local_llm_available)
 
 @app.route('/api/query', methods=['POST'])
-# @requires_auth  # Temporarily disabled for testing
+@requires_auth
 def process_query():
     """Process natural language query and return results."""
     try:
