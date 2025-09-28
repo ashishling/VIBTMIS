@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BT MIS Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .status {
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border-bottom: 3px solid #28a745;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border-bottom: 3px solid #dc3545;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .query-section {
+            margin-bottom: 40px;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.3s;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .sql-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sql-section h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .sql-code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .data-section {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .data-section h3 {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 0;
+            color: #495057;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-content {
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            margin-top: 20px;
+        }
+
+        .examples-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .examples-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .examples-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 BT MIS Analytics</h1>
+            <p>Ask questions about your store data in natural language</p>
+            <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+                <div style="font-size: 14px; font-weight: 600; color: #155724; margin-bottom: 5px;">
+                    🔒 Your data stays completely private and local
+                </div>
+                <div style="font-size: 12px; color: #666;">
+                    • OpenAI API only converts your questions to SQL (no data sent)<br>
+                    • All store data processed locally in DuckDB<br>
+                    • AI summaries generated by your local LLM (Ollama)
+                </div>
+            </div>
+        </div>
+
+        <div class="status {% if api_connected %}connected{% else %}disconnected{% endif %}">
+            {% if api_connected %}
+                ✅ OpenAI API Connected (SQL Generation Only)
+            {% else %}
+                ❌ OpenAI API Not Connected - Please check your API key
+            {% endif %}
+        </div>
+        
+        <div class="status {% if local_llm_available %}connected{% else %}disconnected{% endif %}">
+            {% if local_llm_available %}
+                🤖 Local LLM (Ollama) Connected (Private Summaries)
+            {% else %}
+                ❌ Local LLM Not Available - Install Ollama for private AI summaries
+            {% endif %}
+        </div>
+
+        <div class="main-content">
+            <div class="query-section">
+                <h2>💬 Ask a Question</h2>
+                <form id="queryForm">
+                    <textarea 
+                        id="queryInput" 
+                        class="query-input" 
+                        placeholder="Example: What are the top 10 stores by revenue in 2024?"
+                        rows="3"
+                    ></textarea>
+                    <div style="margin-top: 15px;">
+                        <button type="submit" class="btn" id="submitBtn">🚀 Ask Question</button>
+                        <button type="button" class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+                        <button type="button" class="btn" id="summarizeBtn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); display: none;">🤖 Summarize Results</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>🤖 Converting your question to SQL...</p>
+            </div>
+
+            <div id="results" class="results"></div>
+            
+            <div id="summary-section" class="results" style="display: none;">
+                <div class="data-section">
+                    <h3>🤖 AI Summary</h3>
+                    <div class="data-content">
+                        <div id="summary-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="examples-link">
+                <a href="/examples">📋 See Example Queries</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by OpenAI GPT-4o-mini & DuckDB | 154,440 rows of store data</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Show loading state
+            loading.style.display = 'block';
+            results.innerHTML = '';
+            submitBtn.disabled = true;
+            
+            // Clear previous summary and hide summarize button
+            const summarySection = document.getElementById('summary-section');
+            const summaryContent = document.getElementById('summary-content');
+            const summarizeBtn = document.getElementById('summarizeBtn');
+            summarySection.style.display = 'none';
+            summaryContent.innerHTML = '';
+            summarizeBtn.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="sql-section">
+                            <h3>🔍 Generated SQL Query:</h3>
+                            <div class="sql-code">${data.sql_query}</div>
+                        </div>
+                        <div class="data-section">
+                            <h3>📊 Results for: "${data.query}"</h3>
+                            <div class="data-content">
+                                <pre style="white-space: pre-wrap; font-family: monospace;">${data.results}</pre>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Store data for summarization
+                    window.lastQueryData = {
+                        query: data.query,
+                        sql: data.sql_query,
+                        results: data.results
+                    };
+                    
+                    // Show summarize button if local LLM is available
+                    const summarizeBtn = document.getElementById('summarizeBtn');
+                    const localLLMAvailable = {{ local_llm_available|tojson }};
+                    if (localLLMAvailable) {
+                        summarizeBtn.style.display = 'inline-block';
+                    }
+                } else {
+                    results.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Error</h3>
+                            <p><strong>${data.error}</strong></p>
+                            ${data.details ? `<details><summary>Technical Details</summary><pre>${data.details}</pre></details>` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Network Error</h3>
+                        <p>Could not connect to the server. Please try again.</p>
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary-section').style.display = 'none';
+            document.getElementById('summarizeBtn').style.display = 'none';
+        });
+        
+        document.getElementById('summarizeBtn').addEventListener('click', async function() {
+            if (!window.lastQueryData) {
+                alert('No query data to summarize');
+                return;
+            }
+            
+            const summarizeBtn = this;
+            const summarySection = document.getElementById('summary-section');
+            const summaryContent = document.getElementById('summary-content');
+            
+            // Show loading state
+            summarizeBtn.disabled = true;
+            summarizeBtn.textContent = '🤖 Generating Summary...';
+            summarySection.style.display = 'block';
+            summaryContent.innerHTML = '<div class="spinner"></div><p>Generating AI summary...</p>';
+            
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(window.lastQueryData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    summaryContent.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.6;">${data.summary}</div>`;
+                } else {
+                    summaryContent.innerHTML = `<div class="error"><h3>❌ Summary Error</h3><p>${data.error}</p></div>`;
+                }
+            } catch (error) {
+                summaryContent.innerHTML = `<div class="error"><h3>❌ Network Error</h3><p>Could not generate summary. Please try again.</p></div>`;
+            } finally {
+                summarizeBtn.disabled = false;
+                summarizeBtn.textContent = '🤖 Summarize Results';
+            }
+        });
+    </script>
+</body>
+</html>
