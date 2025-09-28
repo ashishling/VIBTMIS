@@ -166,6 +166,9 @@ if __name__ == '__main__':
         print("🌐 App is running in production mode")
     
     print("🔒 Privacy-first: Your data stays local, OpenAI only generates SQL")
-    print("🔑 Make sure your OpenAI API key is set in .env file")
+    if debug_mode:
+        print("🔑 Make sure your OpenAI API key is set in .env file")
+    else:
+        print("🔑 Make sure your OpenAI API key is set in Railway environment variables")
     
     app.run(debug=debug_mode, host='0.0.0.0', port=port)
