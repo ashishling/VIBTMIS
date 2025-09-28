@@ -23,7 +23,16 @@ def check_auth(username, password):
     # Get credentials from environment variables
     auth_username = os.getenv('AUTH_USERNAME', 'admin')
     auth_password = os.getenv('AUTH_PASSWORD', 'password123')
-    return username == auth_username and password == auth_password
+    
+    # Debug logging
+    print(f"🔐 Auth attempt: username='{username}', provided_password='{password[:3]}***'")
+    print(f"🔐 Expected: username='{auth_username}', expected_password='{auth_password[:3]}***'")
+    print(f"🔐 AUTH_USERNAME env var: {os.getenv('AUTH_USERNAME', 'NOT_SET')}")
+    print(f"🔐 AUTH_PASSWORD env var: {'SET' if os.getenv('AUTH_PASSWORD') else 'NOT_SET'}")
+    
+    result = username == auth_username and password == auth_password
+    print(f"🔐 Auth result: {result}")
+    return result
 
 def authenticate():
     """Send 401 response with authentication header."""
@@ -193,6 +202,13 @@ def examples():
 
 if __name__ == '__main__':
     print("🚀 Starting BT MIS Analytics Web UI...")
+    
+    # Debug environment variables
+    print(f"🔧 Environment variables:")
+    print(f"   AUTH_USERNAME: {os.getenv('AUTH_USERNAME', 'NOT_SET')}")
+    print(f"   AUTH_PASSWORD: {'SET' if os.getenv('AUTH_PASSWORD') else 'NOT_SET'}")
+    print(f"   OPENAI_API_KEY: {'SET' if os.getenv('OPENAI_API_KEY') else 'NOT_SET'}")
+    print(f"   DATABASE_URL: {'SET' if os.getenv('DATABASE_URL') else 'NOT_SET'}")
     
     # Get port from environment variable (Railway sets this)
     port = int(os.environ.get('PORT', 8080))
