@@ -4,17 +4,43 @@ BTC Store Data Analytics Web UI
 Simple Flask web interface for natural language to SQL queries.
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 import os
 from dotenv import load_dotenv
 from nl_to_sql_postgres import get_openai_client, generate_sql_query, execute_sql_query
 from local_llm_summarizer import LocalLLMSummarizer, check_ollama_status, get_available_models
 import traceback
+import base64
 
 # Load environment variables (optional for Railway deployment)
 load_dotenv(override=False)
 
 app = Flask(__name__)
+
+# Basic Authentication
+def check_auth(username, password):
+    """Check if username and password are correct."""
+    # Get credentials from environment variables
+    auth_username = os.getenv('AUTH_USERNAME', 'admin')
+    auth_password = os.getenv('AUTH_PASSWORD', 'password123')
+    return username == auth_username and password == auth_password
+
+def authenticate():
+    """Send 401 response with authentication header."""
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    """Decorator to require authentication for routes."""
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    decorated.__name__ = f.__name__
+    return decorated
 
 # Initialize OpenAI client
 try:
@@ -32,11 +58,13 @@ except Exception as e:
     local_llm_available = False
 
 @app.route('/')
+@requires_auth
 def index():
     """Main page with the query interface."""
     return render_template('index.html', api_connected=api_connected, local_llm_available=local_llm_available)
 
 @app.route('/api/query', methods=['POST'])
+@requires_auth
 def process_query():
     """Process natural language query and return results."""
     try:
@@ -136,6 +164,7 @@ def get_models():
         })
 
 @app.route('/examples')
+@requires_auth
 def examples():
     """Show example queries."""
     example_queries = [
