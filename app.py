@@ -163,6 +163,15 @@ def get_models():
             'error': str(e)
         })
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Railway (no authentication required)."""
+    return jsonify({
+        'status': 'healthy',
+        'api_connected': api_connected,
+        'local_llm_available': local_llm_available
+    })
+
 @app.route('/examples')
 @requires_auth
 def examples():
